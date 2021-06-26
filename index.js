@@ -1,52 +1,75 @@
 const fs = require("fs");
 const path = require("path");
 const baseString = "/home/racso/";
+const trashFolder = "Downloads";
+
+const imageFormats = [".jpg", ".jpeg", ".png"];
+const DocumentFormats = [".pdf", ".xlsx", ".docx"];
+const AudioFormats = [".mp3"];
+const VideoFormats = [".mp4", '.mkv', '.wav'];
+
+
+
 
 const date = new Date();
 const fullDate = {
   day: date.getDate(),
   year: date.getFullYear(),
-  month: date.getMonth()+1,
+  month: date.getMonth() + 1,
 };
 const newFolderName = `${fullDate.day}-${fullDate.month}-${fullDate.year}`;
+
+const createFolder = async(exist, route) => {
+  if (!exist) {
+    await fs.mkdirSync(path.join(baseString, route, newFolderName));
+    folderExist = true;
+  }
+};
+const moveFile = async(route, file) => {
+  await fs.copyFileSync(
+    path.join(baseString, trashFolder, file),
+    path.join(
+      baseString,
+      route,
+      newFolderName,
+      `${path.basename(file)}`
+    )
+  );
+  await fs.unlinkSync(path.join(baseString, trashFolder, file));
+};
+
+const organizeFiles = async(file, formats, route) => {
+  const pictures = await fs.readdirSync(path.join(baseString, route));
+  let index = pictures.length;
+  
+  if (formats.includes(path.extname(file))) {
+    let imageName = `IMG-${index}`;
+
+    await createFolder(pictures.includes(newFolderName), route);
+    await moveFile(route, file, imageName);
+
+    index += 1;
+  }
+};
+
 
 
 const main = async () => {
   try {
-    const downloadsFiles = await fs.readdirSync(path.join(baseString, "Downloads"));
-    const pictures = await fs.readdirSync(path.join(baseString, "Pictures"));
+    const downloadsFiles = await fs.readdirSync(
+      path.join(baseString, "Downloads")
+    );
 
-    let index = pictures.length;
-    let folderExist = pictures.includes(newFolderName);
     for (const file of downloadsFiles) {
-      if (
-        path.extname(file) === ".jpg" ||
-        path.extname(file) === ".jpeg" ||
-        path.extname(file) === ".png"
-      ) {
-        
-
-        let imageName = `IMG-${index}`;
-
-        if (!folderExist) {
-          await fs.mkdirSync(path.join(baseString, "Pictures", newFolderName));
-          folderExist = true;
-        }
-        await fs.copyFileSync(
-          path.join(baseString, "Downloads", file),
-          path.join(baseString, "Pictures", newFolderName, `${imageName}${path.extname(file)}`)
-        );
-        index += 1;
-
-        await fs.unlinkSync(path.join(baseString, 'Downloads/', file));
-      }
+      await organizeFiles(file, imageFormats,'Pictures');
+      await organizeFiles(file, DocumentFormats,'Documents');
+      await organizeFiles(file, AudioFormats,'Music');
+      await organizeFiles(file, VideoFormats,'Videos');
     }
   } catch (error) {
     console.log("error :>> ", error);
   }
-  console.log(`get`, )
 };
-setInterval(()=>{
-
-    main();
-}, 3000)
+setInterval(() => {
+  main();
+}, 3000);
