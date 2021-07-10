@@ -4,44 +4,43 @@ const baseString = "/home/racso/";
 const trashFolder = "Downloads";
 
 const imageFormats = [".jpg", ".jpeg", ".png"];
-const DocumentFormats = [".pdf", ".xlsx", ".docx"];
+const DocumentFormats = [".pdf", ".xlsx", ".docx", ".txt"];
 const AudioFormats = [".mp3"];
-const VideoFormats = [".mp4", '.mkv', '.wav'];
+const VideoFormats = [".mp4", ".mkv", ".wav"];
 
-
-
-
-const date = new Date();
-const fullDate = {
+let date = new Date();
+let fullDate = {
   day: date.getDate(),
   year: date.getFullYear(),
   month: date.getMonth() + 1,
 };
-const newFolderName = `${fullDate.day}-${fullDate.month}-${fullDate.year}`;
+let newFolderName = `${fullDate.day}-${fullDate.month}-${fullDate.year}`;
 
-const createFolder = async(exist, route) => {
+const createFolder = async (exist, route) => {
   if (!exist) {
     await fs.mkdirSync(path.join(baseString, route, newFolderName));
-    folderExist = true;
   }
 };
-const moveFile = async(route, file) => {
+const moveFile = async (route, file) => {
   await fs.copyFileSync(
     path.join(baseString, trashFolder, file),
-    path.join(
-      baseString,
-      route,
-      newFolderName,
-      `${path.basename(file)}`
-    )
+    path.join(baseString, route, newFolderName, `${path.basename(file)}`)
   );
   await fs.unlinkSync(path.join(baseString, trashFolder, file));
 };
 
-const organizeFiles = async(file, formats, route) => {
+const organizeFiles = async (file, formats, route) => {
+  date = new Date();
+  fullDate = {
+    day: date.getDate(),
+    year: date.getFullYear(),
+    month: date.getMonth() + 1,
+  };
+  newFolderName = `${fullDate.day}-${fullDate.month}-${fullDate.year}`;
+
   const pictures = await fs.readdirSync(path.join(baseString, route));
   let index = pictures.length;
-  
+
   if (formats.includes(path.extname(file))) {
     let imageName = `IMG-${index}`;
 
@@ -52,19 +51,18 @@ const organizeFiles = async(file, formats, route) => {
   }
 };
 
-
-
 const main = async () => {
+  console.log(`inicio`);
   try {
     const downloadsFiles = await fs.readdirSync(
       path.join(baseString, "Downloads")
     );
 
     for (const file of downloadsFiles) {
-      await organizeFiles(file, imageFormats,'Pictures');
-      await organizeFiles(file, DocumentFormats,'Documents');
-      await organizeFiles(file, AudioFormats,'Music');
-      await organizeFiles(file, VideoFormats,'Videos');
+      await organizeFiles(file, imageFormats, "Pictures");
+      await organizeFiles(file, DocumentFormats, "Documents");
+      await organizeFiles(file, AudioFormats, "Music");
+      await organizeFiles(file, VideoFormats, "Videos");
     }
   } catch (error) {
     console.log("error :>> ", error);
