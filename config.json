@@ -19,5 +19,5 @@
   },
   "foldersToOrganize": ["Downloads"],
   "baseString": "/home/racso/",
-  "timeStamp": 30000
+  "timeStamp": "*/30 * * * * *"
 }
