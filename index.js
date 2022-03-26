@@ -1,73 +1,81 @@
-const fs = require("fs");
-const path = require("path");
-const baseString = "/home/racso/";
-const trashFolder = "Downloads";
+const config = require('./config.json');
 
-const imageFormats = [".jpg", ".jpeg", ".png"];
-const DocumentFormats = [".pdf", ".xlsx", ".docx", ".txt"];
-const AudioFormats = [".mp3"];
-const VideoFormats = [".mp4", ".mkv", ".wav"];
-
-let date = new Date();
-let fullDate = {
-  day: date.getDate(),
-  year: date.getFullYear(),
-  month: date.getMonth() + 1,
-};
-let newFolderName = `${fullDate.day}-${fullDate.month}-${fullDate.year}`;
-
-const createFolder = async (exist, route) => {
-  if (!exist) {
-    await fs.mkdirSync(path.join(baseString, route, newFolderName));
-  }
-};
-const moveFile = async (route, file) => {
-  await fs.copyFileSync(
-    path.join(baseString, trashFolder, file),
-    path.join(baseString, route, newFolderName, `${path.basename(file)}`)
-  );
-  await fs.unlinkSync(path.join(baseString, trashFolder, file));
-};
-
-const organizeFiles = async (file, formats, route) => {
-  date = new Date();
-  fullDate = {
-    day: date.getDate(),
-    year: date.getFullYear(),
-    month: date.getMonth() + 1,
-  };
-  newFolderName = `${fullDate.day}-${fullDate.month}-${fullDate.year}`;
-
-  const pictures = await fs.readdirSync(path.join(baseString, route));
-  let index = pictures.length;
-
-  if (formats.includes(path.extname(file))) {
-    let imageName = `IMG-${index}`;
-
-    await createFolder(pictures.includes(newFolderName), route);
-    await moveFile(route, file, imageName);
-
-    index += 1;
-  }
-};
-
-const main = async () => {
-  console.log(`inicio`);
-  try {
-    const downloadsFiles = await fs.readdirSync(
-      path.join(baseString, "Downloads")
-    );
-
-    for (const file of downloadsFiles) {
-      await organizeFiles(file, imageFormats, "Pictures");
-      await organizeFiles(file, DocumentFormats, "Documents");
-      await organizeFiles(file, AudioFormats, "Music");
-      await organizeFiles(file, VideoFormats, "Videos");
-    }
-  } catch (error) {
-    console.log("error :>> ", error);
-  }
-};
 setInterval(() => {
+  const fs = require('fs');
+  const path = require('path');
+
+  const baseString = config.baseString;
+  const trashsFolder = config.foldersToOrganize;
+  const extensions = Object.keys(config.extension);
+  const prefixs = config.outPutPrefix;
+  const getFolderName = () => {
+    const date = new Date();
+
+    const fullDate = {
+      day: date.getDate(),
+      year: date.getFullYear(),
+      month: date.getMonth() + 1,
+    };
+    return `${fullDate.day}-${fullDate.month}-${fullDate.year}`;
+  };
+
+  const createFolder = ({ destination }) => {
+    fs.mkdirSync(path.join(baseString, destination));
+  };
+  const moveFile = async ({ destination, fileName, file, origin }) => {
+    fs.copyFileSync(
+      path.join(baseString, origin, file),
+      path.join(baseString, destination, getFolderName(), `${fileName}`)
+    );
+    fs.unlinkSync(path.join(baseString, origin, file));
+  };
+
+  const organizeFiles = async ({
+    file,
+    formats,
+    destination,
+    origin,
+    extension,
+  }) => {
+    const files = fs.readdirSync(path.join(baseString, destination));
+
+    if (formats.includes(path.extname(file))) {
+      const fileName = `${prefixs[extension]}${path.basename(file)}`;
+      const folderName = getFolderName();
+      if (!files.includes(folderName))
+        createFolder({ destination: path.join(destination, folderName) });
+      await moveFile({ destination, file, fileName, origin });
+    }
+  };
+
+  const main = async () => {
+    console.log(`inicio`);
+    try {
+      trashsFolder.forEach(async (folder) => {
+        const downloadsFiles = fs.readdirSync(path.join(baseString, folder));
+
+        downloadsFiles.forEach(async (file) => {
+          extensions.forEach(async (extension) => {
+            if (
+              !fs.existsSync(
+                path.join(baseString, config.destination[extension])
+              )
+            )
+              createFolder({ destination: config.destination[extension] });
+
+            await organizeFiles({
+              file,
+              formats: config.extension[extension],
+              destination: config.destination[extension],
+              origin: folder,
+              extension,
+            });
+          });
+        });
+      });
+    } catch (error) {
+      console.log('error :>> ', error);
+    }
+  };
   main();
-}, 3000);
+}, config.timeStamp);

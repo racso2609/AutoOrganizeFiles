@@ -1,0 +1,23 @@
+{
+  "extension": {
+    "images": [".jpg", ".jpeg", ".png"],
+    "documents": [".pdf", ".xlsx", ".docx", ".txt"],
+    "audios": [".mp3"],
+    "videos": [".mp4", ".mkv", ".wav"]
+  },
+  "destination": {
+    "images": "Images",
+    "documents": "Documents",
+    "audios": "Music",
+    "videos": "Videos"
+  },
+  "outPutPrefix": {
+    "images": "IMG-",
+    "documents": "Doc-",
+    "audios": "Sound-",
+    "videos": "Vid-"
+  },
+  "foldersToOrganize": ["Downloads"],
+  "baseString": "/home/racso/",
+  "timeStamp": 30000
+}
