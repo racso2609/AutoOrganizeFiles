@@ -4,9 +4,9 @@ const fs = require('fs');
 const path = require('path');
 
 const baseString = config.baseString;
-const trashsFolder = config.foldersToOrganize;
+const trashesFolder = config.foldersToOrganize;
 const extensions = Object.keys(config.extension);
-const prefixs = config.outPutPrefix;
+const prefixes = config.outPutPrefix;
 const getFolderName = () => {
   const date = new Date();
 
@@ -39,7 +39,7 @@ const organizeFiles = async ({
   const files = fs.readdirSync(path.join(baseString, destination));
 
   if (formats.includes(path.extname(file))) {
-    const fileName = `${prefixs[extension]}${path.basename(file)}`;
+    const fileName = `${prefixes[extension]}${path.basename(file)}`;
     const folderName = getFolderName();
     if (!files.includes(folderName))
       createFolder({ destination: path.join(destination, folderName) });
@@ -50,7 +50,7 @@ const organizeFiles = async ({
 const main = async () => {
   console.log(`inicio`);
   try {
-    trashsFolder.forEach(async (folder) => {
+    trashesFolder.forEach(async (folder) => {
       const downloadsFiles = fs.readdirSync(path.join(baseString, folder));
 
       downloadsFiles.forEach(async (file) => {
