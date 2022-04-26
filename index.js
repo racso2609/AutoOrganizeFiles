@@ -50,11 +50,11 @@ const organizeFiles = async ({
 const main = async () => {
   console.log(`inicio`);
   try {
-    trashesFolder.forEach(async (folder) => {
+    trashesFolder.forEach(async folder => {
       const downloadsFiles = fs.readdirSync(path.join(baseString, folder));
 
-      downloadsFiles.forEach(async (file) => {
-        extensions.forEach(async (extension) => {
+      downloadsFiles.forEach(async file => {
+        extensions.forEach(async extension => {
           if (
             !fs.existsSync(path.join(baseString, config.destination[extension]))
           )
